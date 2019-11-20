@@ -1,0 +1,10 @@
+# /etc/systemd/system/aqihk.timer
+
+[Unit]
+Description=Shapes of districts Twitter bot timer
+
+[Timer]
+OnCalendar=hourly
+
+[Install]
+WantedBy=timers.target
