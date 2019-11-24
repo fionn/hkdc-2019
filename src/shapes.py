@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Shapes of Hong Kong"""
+"""Geographical shapes"""
 
-#import os
+import os
 import csv
 import random
 from pathlib import Path
@@ -18,8 +18,8 @@ class Shape: # pylint: disable=too-few-public-methods
     def __init__(self, sort: int, filename: str, caption_en: str,
                  caption_zh: str) -> None:
         self.sort = sort
-        # FIX: this assumes the files are in the working directory
-        self.file = Path(filename).resolve(strict=True)
+        search_path = Path("assets/").resolve(strict=True)
+        self.file = Path(search_path / filename).resolve(strict=True)
         self.caption = self.Caption(caption_en, caption_zh)
         self.geo = self.Coordinates(200, 200) # placeholder
 
@@ -48,12 +48,11 @@ class Twitter:
 
 def main() -> None:
     """Entry point"""
-    #auth = tweepy.OAuthHandler(os.environ["API_KEY"], os.environ["API_SECRET"])
-    #auth.set_access_token(os.environ["ACCESS_TOKEN"],
-    #                      os.environ["ACCESS_TOKEN_SECRET"])
-    #api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+    auth = tweepy.OAuthHandler(os.environ["API_KEY"], os.environ["API_SECRET"])
+    auth.set_access_token(os.environ["ACCESS_TOKEN"],
+                          os.environ["ACCESS_TOKEN_SECRET"])
+    api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
-    api = None
     twitter = Twitter(api)
 
     with open("example.tsv") as data_fd:
