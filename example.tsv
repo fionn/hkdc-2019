@@ -1,2 +1,2 @@
-sort	filename	caption_en	caption_zh
-1	001.jpg	Wan Chai	灣仔
+sort	filename	caption_en	caption_zh	latitude	longitude
+1	001.jpg	Wan Chai	灣仔	22.279722	114.171667
