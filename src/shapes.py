@@ -4,13 +4,29 @@
 import os
 import csv
 import random
+import logging
 import argparse
 from pathlib import Path
 from typing import NamedTuple
 
 import tweepy
 
-class Shape: # pylint: disable=too-few-public-methods
+SEARCH_PATH = Path(os.environ["SEARCH_PATH"])
+
+def configure_logger(module_name: str) -> logging.Logger:
+    """Configure the logger"""
+    logger = logging.getLogger(module_name)
+    formatter = logging.Formatter(fmt="%(levelname)s: %(message)s")
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    return logger
+
+LOG = configure_logger(__name__)
+
+# pylint: disable=too-few-public-methods
+class Shape:
     """Shape object"""
 
     Caption = NamedTuple("Caption", [("en", str), ("zh", str)])
@@ -19,11 +35,10 @@ class Shape: # pylint: disable=too-few-public-methods
     # pylint: disable=too-many-arguments
     def __init__(self, sort: int, filename: str, caption_en: str,
                  caption_zh: str, latitude: float, longitude: float) -> None:
-        self.sort = sort
-        search_path = Path("assets/").resolve(strict=True)
-        self.file = Path(search_path / filename).resolve(strict=True)
+        self.sort = int(sort)
+        self.file = Path(SEARCH_PATH / filename).resolve(strict=True)
         self.caption = self.Caption(caption_en, caption_zh)
-        self.geo = self.Coordinates(latitude, longitude)
+        self.geo = self.Coordinates(float(latitude), float(longitude))
 
     def __repr__(self) -> str:
         return f"Shape{self.sort, self.file.name, *self.caption, *self.geo}"
@@ -40,25 +55,33 @@ class Twitter:
                               wait_on_rate_limit_notify=True)
 
     @staticmethod
-    def compose(shape: Shape) -> dict:
-        """Very over-egged, but want it to be generic for lat, long, etc."""
-        status = f"{shape.caption.en}\n{shape.caption.zh}"
-        return {"status": status, "lat": shape.geo.lat, "long": shape.geo.long}
+    def _compose(shape: Shape) -> dict:
+        """Compose a status dictionary compatible with api.status_update"""
+        text = f"{shape.caption.en}, {shape.caption.zh}."
+        return {"status": text, "lat": shape.geo.lat, "long": shape.geo.long}
 
     def update(self, shape: Shape) -> tweepy.Status:
         """Post tweet for shape"""
-        #composition = self.compose(shape)
-        #media = self.api.media_upload(filename=shape.file.name,
-        #                              file=shape.file)
-        #api.create_media_metadata(media.media_id, f"{shape.caption.en}")
-        #return self.api.update(**composition, media_ids=[media.media_id])
+        composition = self._compose(shape)
+        LOG.info("Selecting %s", composition["status"])
+
+        with shape.file.open("rb") as shape_fd:
+            media = self.api.media_upload(filename=shape.file.name,
+                                          file=shape_fd)
+
+        # Not implemented yet, wait for > v3.8.0
+        #self.api.create_media_metadata(media.media_id, f"{shape.caption.en}")
+        return self.api.update_status(**composition, media_ids=[media.media_id])
 
 def main() -> None:
     """Entry point"""
-    parser = argparse.ArgumentParser(prog="shapes", description="Tweet shapes")
-    parser.add_argument("data", type=Path,
-                        help="path to TSV data file")
+    parser = argparse.ArgumentParser(description="Tweet shapes")
+    parser.add_argument("data", type=Path, metavar="TSV_FILE",
+                        help="path to tab-delimited data file")
     args = parser.parse_args()
+
+    LOG.debug("Using search path \"%s\"", SEARCH_PATH)
+    SEARCH_PATH.resolve(strict=True)
 
     with args.data.open() as data_fd:
         data_reader = csv.DictReader(data_fd, delimiter="\t", dialect="unix")
@@ -67,7 +90,15 @@ def main() -> None:
     twitter = Twitter()
 
     shape = random.choice(shapes)
-    twitter.update(shape)
+    tweet = twitter.update(shape)
+
+    LOG.info("\"%s\" from %s", tweet.text, tweet.place.full_name)
+
+    if tweet.geo["coordinates"] != [*shape.geo]:
+        LOG.error("Coordinate mismatch! Sent %s, received %s",
+                  shape.geo, tweet.geo["coordinates"])
+        tweet.destroy()
+        raise RuntimeError("Coordinate mismatch, tweet destroyed")
 
 if __name__ == "__main__":
     main()
