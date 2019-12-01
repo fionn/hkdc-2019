@@ -3,6 +3,7 @@
 
 import os
 import csv
+import enum
 import random
 import logging
 import argparse
@@ -11,7 +12,6 @@ from typing import NamedTuple
 
 import tweepy
 
-SEARCH_PATH = Path(os.environ["SEARCH_PATH"])
 
 def configure_logger(module_name: str) -> logging.Logger:
     """Configure the logger"""
@@ -25,7 +25,25 @@ def configure_logger(module_name: str) -> logging.Logger:
 
 LOG = configure_logger(__name__)
 
-# pylint: disable=too-few-public-methods
+@enum.unique
+class Faction(enum.Enum):
+    """Enumeration of political camps"""
+    democracy = 1
+    establishment = 2
+
+    class DCWinnerError(Exception):
+        """Raise on failed enumeration"""
+
+    @classmethod
+    def map(cls, identifier: str) -> "Faction":
+        """Map identifiers to enumerations"""
+        if identifier == "democracy":
+            return cls.democracy
+        if identifier == "establishment":
+            return cls.establishment
+        raise cls.DCWinnerError(f"Can't enumerate {identifier}")
+
+# pylint: disable=too-few-public-methods,too-many-instance-attributes
 class Shape:
     """Shape object"""
 
@@ -34,11 +52,17 @@ class Shape:
 
     # pylint: disable=too-many-arguments
     def __init__(self, sort: int, filename: str, caption_en: str,
-                 caption_zh: str, latitude: float, longitude: float) -> None:
+                 caption_zh: str, latitude: float, longitude: float,
+                 electoral_code: str, dc_winner: str,
+                 percentage_democracy: float) -> None:
+        self._search_path = Path(os.environ["SEARCH_PATH"])
         self.sort = int(sort)
-        self.file = Path(SEARCH_PATH / filename).resolve(strict=True)
+        self.file = Path(self._search_path / filename).resolve(strict=True)
         self.caption = self.Caption(caption_en, caption_zh)
         self.geo = self.Coordinates(float(latitude), float(longitude))
+        self.electoral_code = electoral_code
+        self.dc_winner = Faction.map(dc_winner)
+        self.percentage_democracy = percentage_democracy
 
     def __repr__(self) -> str:
         return f"Shape{self.sort, self.file.name, *self.caption, *self.geo}"
@@ -76,15 +100,12 @@ class Twitter:
 def main() -> None:
     """Entry point"""
     parser = argparse.ArgumentParser(description="Tweet shapes")
-    parser.add_argument("data", type=Path, metavar="TSV_FILE",
-                        help="path to tab-delimited data file")
+    parser.add_argument("data", type=Path, metavar="CSV_FILE",
+                        help="path to CSV data file")
     args = parser.parse_args()
 
-    LOG.debug("Using search path \"%s\"", SEARCH_PATH)
-    SEARCH_PATH.resolve(strict=True)
-
     with args.data.open() as data_fd:
-        data_reader = csv.DictReader(data_fd, delimiter="\t", dialect="unix")
+        data_reader = csv.DictReader(data_fd, delimiter=",", dialect="unix")
         shapes = [Shape(**row) for row in data_reader]
 
     twitter = Twitter()
@@ -93,12 +114,6 @@ def main() -> None:
     tweet = twitter.update(shape)
 
     LOG.info("\"%s\" from %s", tweet.text, tweet.place.full_name)
-
-    if tweet.geo["coordinates"] != [*shape.geo]:
-        LOG.error("Coordinate mismatch! Sent %s, received %s",
-                  shape.geo, tweet.geo["coordinates"])
-        tweet.destroy()
-        raise RuntimeError("Coordinate mismatch, tweet destroyed")
 
 if __name__ == "__main__":
     main()

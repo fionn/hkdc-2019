@@ -3,8 +3,8 @@ name: CI
 on: push
 
 jobs:
-  lint:
-    name: Lint
+  test:
+    name: Lint and Test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -21,6 +21,8 @@ jobs:
       run: make lint
     - name: Typecheck
       run: make typecheck
+    - name: Test
+      run: make test
     - name: Safety check
       env:
         SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}

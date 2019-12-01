@@ -6,6 +6,10 @@ $(VENV): requirements.txt
 	@source $@/bin/activate && pip install -r $<
 	@echo "Enter virtual environment: source venv/bin/activate"
 
+.PHONY: test
+test:
+	@python $(SRC)/test.py
+
 tags: $(SRC)
 	@ctags --languages=python --python-kinds=-i -R $(SRC)
 

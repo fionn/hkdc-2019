@@ -1,2 +1,2 @@
-sort,filename,caption_en,caption_zh,lat,long
-1,001.jpg,Wan Chai,灣仔,22.279722,114.171667
+sort,filename,caption_en,caption_zh,latitude,longitude,electoral_code,dc_winner,percentage_democracy
+1,001.jpg,Wan Chai,灣仔,22.279722,114.171667,B-03,democracy,57.76

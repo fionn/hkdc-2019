@@ -1,6 +1,6 @@
 # symlink to /etc/systemd/system/
 [Unit]
-Description=Shapes of districtsTwitter bot
+Description=Shapes of districts Twitter bot
 After=network.target
 
 [Service]

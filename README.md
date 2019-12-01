@@ -9,13 +9,15 @@ Export the following environment variables for authenticating to the Twitter API
 * `API_SECRET`,
 * `ACCESS_TOKEN`,
 * `ACCESS_TOKEN_SECRET`.
-(See [https://github.com/fionn/twitterauthenticator](twitterauthenticator) for how to generate these.)
+
+(See [https://github.com/fionn/twitterauthenticator](twitterauthenticator) for how to generate the access tokens.)
 
 You must also export `SEARCH_PATH`. This will prefix the file names given in the data.
 
 ## Usage
 
-It takes a single mandatory positional argument which must be a tab-delimited file with the format matching [`example/example.tsv`](example/example.tsv). The entries in the `filename` column must be real files that exist under `SEARCH_PATH`.
+It takes a single mandatory positional argument which must be a comma-delimited file with the format matching [`example/example.csv`](example/example.csv).
+The entries in the `filename` column must be real files that exist under `SEARCH_PATH`.
 
 See `./src/shapes.py --help` for details.
 
@@ -23,4 +25,6 @@ See `./src/shapes.py --help` for details.
 
 ### Systemd
 
-Add the above environment variables to `.env` in the repository root, without an `export` directive. Add the data to `data.tsv` in the repository root. Then symlink or copy the unit files in [`system_units/`](system_units/) to `/etc/systemd/system/` and enable the timer.
+Add the above environment variables to `.env` in the repository root, without an `export` directive.
+Add the data to `data.csv` in the repository root.
+Then symlink or copy the unit files in [`system_units/`](system_units/) to `/etc/systemd/system/` and enable the timer.
