@@ -15,15 +15,27 @@ class TestFaction(unittest.TestCase):
         """Create and compare enums"""
         democracy = Faction.democracy
         establishment = Faction.establishment
+        nonpartisan = Faction.nonpartisan
         self.assertNotEqual(democracy, establishment)
+        self.assertNotEqual(democracy, nonpartisan)
+        self.assertNotEqual(establishment, nonpartisan)
 
     def test_enum_map(self) -> None:
         """Test the str -> enum mapping"""
         democracy = Faction.map("democracy")
         establishment = Faction.map("establishment")
+        nonpartisan = Faction.map("nonpartisan")
         self.assertEqual(democracy, Faction.democracy)
         self.assertEqual(establishment, Faction.establishment)
+        self.assertEqual(nonpartisan, Faction.nonpartisan)
         self.assertNotEqual(democracy, establishment)
+        self.assertNotEqual(democracy, nonpartisan)
+        self.assertNotEqual(establishment, nonpartisan)
+
+    def test_enum_bad_identifier(self) -> None:
+        """Test raising Faction.MappingError"""
+        with self.assertRaises(ValueError):
+            Faction.map("yolo")
 
 class TestShape(unittest.TestCase):
     """Test cases for Shape"""

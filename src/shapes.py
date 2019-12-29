@@ -12,7 +12,6 @@ from typing import NamedTuple
 
 import tweepy
 
-
 def configure_logger(module_name: str) -> logging.Logger:
     """Configure the logger"""
     logger = logging.getLogger(module_name)
@@ -30,18 +29,15 @@ class Faction(enum.Enum):
     """Enumeration of political camps"""
     democracy = 1
     establishment = 2
-
-    class DCWinnerError(Exception):
-        """Raise on failed enumeration"""
+    nonpartisan = 3
 
     @classmethod
     def map(cls, identifier: str) -> "Faction":
         """Map identifiers to enumerations"""
-        if identifier == "democracy":
-            return cls.democracy
-        if identifier == "establishment":
-            return cls.establishment
-        raise cls.DCWinnerError(f"Can't enumerate {identifier}")
+        try:
+            return cls[identifier]
+        except KeyError:
+            raise ValueError(f"Can't enumerate {identifier}")
 
 # pylint: disable=too-few-public-methods,too-many-instance-attributes
 class Shape:
@@ -81,13 +77,24 @@ class Twitter:
     @staticmethod
     def _compose(shape: Shape) -> dict:
         """Compose a status dictionary compatible with api.status_update"""
-        text = f"{shape.caption.en}, {shape.caption.zh}."
+        if shape.dc_winner == Faction.nonpartisan:
+            affiliation = "non-partisan" #pylint: disable=unused-variable
+        else:
+            affiliation = f"pro-{shape.dc_winner.name}"
+
+        text = f"{shape.electoral_code}: " \
+               f"{shape.caption.en}, {shape.caption.zh}.\n" \
+               f"Voted {affiliation} in the 2019 District Council elections."
         return {"status": text, "lat": shape.geo.lat, "long": shape.geo.long}
 
-    def update(self, shape: Shape) -> tweepy.Status:
+    def update(self, shape: Shape, dry_run: bool = False) -> tweepy.Status:
         """Post tweet for shape"""
         composition = self._compose(shape)
-        LOG.info("Selecting %s", composition["status"])
+        LOG.info("Selecting %s, %s, %s",
+                 shape.electoral_code, shape.caption.en, shape.caption.zh)
+
+        if dry_run:
+            return tweepy.Status
 
         with shape.file.open("rb") as shape_fd:
             media = self.api.media_upload(filename=shape.file.name,
@@ -102,6 +109,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Tweet shapes")
     parser.add_argument("data", type=Path, metavar="CSV_FILE",
                         help="path to CSV data file")
+    parser.add_argument("-n", "--dry-run", action="store_true")
     args = parser.parse_args()
 
     with args.data.open() as data_fd:
@@ -111,9 +119,13 @@ def main() -> None:
     twitter = Twitter()
 
     shape = random.choice(shapes)
-    tweet = twitter.update(shape)
+    tweet = twitter.update(shape, args.dry_run)
 
-    LOG.info("\"%s\" from %s", tweet.text, tweet.place.full_name)
+    try:
+        LOG.info("\"%s\" from %s", tweet.text, tweet.place.full_name)
+    except AttributeError:
+        if not args.dry_run:
+            raise
 
 if __name__ == "__main__":
     main()

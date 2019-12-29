@@ -10,7 +10,7 @@ Export the following environment variables for authenticating to the Twitter API
 * `ACCESS_TOKEN`,
 * `ACCESS_TOKEN_SECRET`.
 
-(See [https://github.com/fionn/twitterauthenticator](twitterauthenticator) for how to generate the access tokens.)
+(See [https://github.com/fionn/twitterauthenticator](twitterauthenticator) for how to generate access tokens.)
 
 You must also export `SEARCH_PATH`. This will prefix the file names given in the data.
 
