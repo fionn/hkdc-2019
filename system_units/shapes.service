@@ -5,9 +5,9 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/fionn/bots/shapes/
-EnvironmentFile=/home/fionn/bots/shapes/.env
-ExecStart=/home/fionn/bots/shapes/venv/bin/python3 -u src/shapes.py data.csv
+WorkingDirectory=/home/fionn/bots/shapes-bot/
+EnvironmentFile=/home/fionn/bots/shapes-bot/.env
+ExecStart=/home/fionn/bots/shapes-bot/venv/bin/python3 -u src/shapes.py data.csv
 Restart=on-failure
 RestartSec=900
 
