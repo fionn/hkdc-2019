@@ -27,4 +27,5 @@ See `./src/shapes.py --help` for details.
 
 Add the above environment variables to `.env` in the repository root, without an `export` directive.
 Add the data to `data.csv` in the repository root.
+Make the virtual environment.
 Then symlink or copy the unit files in [`system_units/`](system_units/) to `/etc/systemd/system/` and enable the timer.
