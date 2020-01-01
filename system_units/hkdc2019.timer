@@ -4,7 +4,9 @@
 Description=Shapes of districts Twitter bot timer
 
 [Timer]
-OnCalendar=*-*-* 08:00:00 UTC
+OnCalendar=*-*-* 11:00:00 HKT
+OnCalendar=*-*-* 17:00:00 HKT
+OnCalendar=*-*-* 20:00:00 HKT
 
 [Install]
 WantedBy=timers.target
