@@ -6,7 +6,7 @@ import csv
 import pathlib
 import unittest
 
-from shapes import Faction, Shape
+from constituencies import Faction, Constituency
 
 class TestFaction(unittest.TestCase):
     """Test cases for enumeration"""
@@ -37,11 +37,11 @@ class TestFaction(unittest.TestCase):
         with self.assertRaises(ValueError):
             Faction.map("yolo")
 
-class TestShape(unittest.TestCase):
-    """Test cases for Shape"""
+class TestConstituency(unittest.TestCase):
+    """Test cases for Constituency"""
 
     def test_init_kwargs(self) -> None:
-        """Initialise Shape with keyword arguments"""
+        """Initialise Constituency with keyword arguments"""
         os.environ["SEARCH_PATH"] = "example/assets/"
         kwargs = {"sort": 1,
                   "filename": "001.jpg",
@@ -52,26 +52,26 @@ class TestShape(unittest.TestCase):
                   "electoral_code": "B-03",
                   "dc_winner": "democracy",
                   "percentage_democracy": 57.76}
-        shape = Shape(**kwargs) # type: ignore
-        self.assertIsInstance(shape, Shape)
+        constituency = Constituency(**kwargs) # type: ignore
+        self.assertIsInstance(constituency, Constituency)
 
     def test_init_args(self) -> None:
-        """Initialise Shape with positional arguments"""
+        """Initialise Constituency with positional arguments"""
         os.environ["SEARCH_PATH"] = "example/assets/"
         args = [1, "001.jpg", "Wan Chai", "灣仔", 22.279722, 114.171667,
                 "B-03", "democracy", 57.76]
-        shape = Shape(*args) # type: ignore
-        self.assertIsInstance(shape, Shape)
+        constituency = Constituency(*args) # type: ignore
+        self.assertIsInstance(constituency, Constituency)
 
     def test_init_file(self) -> None:
-        """Initialise Shape with data file"""
+        """Initialise Constituency with data file"""
         os.environ["SEARCH_PATH"] = "example/assets/"
         data = pathlib.Path("example/example.csv")
         with data.open() as data_fd:
             data_reader = csv.DictReader(data_fd, dialect="unix")
-            shapes = [Shape(**row) for row in data_reader]
-        for shape in shapes:
-            self.assertIsInstance(shape, Shape)
+            constituencies = [Constituency(**row) for row in data_reader]
+        for constituency in constituencies:
+            self.assertIsInstance(constituency, Constituency)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

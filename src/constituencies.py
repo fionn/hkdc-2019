@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Geographical shapes"""
+"""Hong Kong District Council constituencies"""
 
 import os
 import csv
@@ -40,8 +40,8 @@ class Faction(enum.Enum):
             raise ValueError(f"Can't enumerate {identifier}")
 
 # pylint: disable=too-few-public-methods,too-many-instance-attributes
-class Shape:
-    """Shape object"""
+class Constituency:
+    """Constituency object"""
 
     Caption = NamedTuple("Caption", [("en", str), ("zh", str)])
     Coordinates = NamedTuple("Coordinates", [("lat", float), ("long", float)])
@@ -61,7 +61,7 @@ class Shape:
         self.percentage_democracy = percentage_democracy
 
     def __repr__(self) -> str:
-        return f"Shape{self.sort, self.file.name, *self.caption, *self.geo}"
+        return f"Constituency{self.electoral_code, *self.caption, *self.geo}"
 
 class Twitter:
     """Wrapper for the Twitter API"""
@@ -75,38 +75,43 @@ class Twitter:
                               wait_on_rate_limit_notify=True)
 
     @staticmethod
-    def _compose(shape: Shape) -> dict:
+    def _compose(constituency: Constituency) -> dict:
         """Compose a status dictionary compatible with api.status_update"""
-        if shape.dc_winner == Faction.nonpartisan:
+        if constituency.dc_winner == Faction.nonpartisan:
             affiliation = "non-partisan" #pylint: disable=unused-variable
         else:
-            affiliation = f"pro-{shape.dc_winner.name}"
+            affiliation = f"pro-{constituency.dc_winner.name}"
 
-        text = f"{shape.electoral_code}: " \
-               f"{shape.caption.en}, {shape.caption.zh}.\n" \
+        text = f"{constituency.electoral_code}: " \
+               f"{constituency.caption.en}, {constituency.caption.zh}.\n" \
                f"Voted {affiliation} in the 2019 District Council elections."
-        return {"status": text, "lat": shape.geo.lat, "long": shape.geo.long}
+        return {"status": text,
+                "lat": constituency.geo.lat,
+                "long": constituency.geo.long}
 
-    def update(self, shape: Shape, dry_run: bool = False) -> tweepy.Status:
-        """Post tweet for shape"""
-        composition = self._compose(shape)
+    def update(self, constituency: Constituency, dry_run: bool = False) -> tweepy.Status:
+        """Post tweet for constituency"""
+        composition = self._compose(constituency)
         LOG.info("Selecting %s, %s, %s",
-                 shape.electoral_code, shape.caption.en, shape.caption.zh)
+                 constituency.electoral_code,
+                 constituency.caption.en,
+                 constituency.caption.zh)
 
         if dry_run:
             return tweepy.Status
 
-        with shape.file.open("rb") as shape_fd:
-            media = self.api.media_upload(filename=shape.file.name,
-                                          file=shape_fd)
+        with constituency.file.open("rb") as constituency_fd:
+            media = self.api.media_upload(filename=constituency.file.name,
+                                          file=constituency_fd)
 
         # Not implemented yet, wait for > v3.8.0
-        #self.api.create_media_metadata(media.media_id, f"{shape.caption.en}")
+        #self.api.create_media_metadata(media.media_id,
+        #                               f"{constituency.caption.en}")
         return self.api.update_status(**composition, media_ids=[media.media_id])
 
 def main() -> None:
     """Entry point"""
-    parser = argparse.ArgumentParser(description="Tweet shapes")
+    parser = argparse.ArgumentParser(description="Tweet HKDC constituencies")
     parser.add_argument("data", type=Path, metavar="CSV_FILE",
                         help="path to CSV data file")
     parser.add_argument("-n", "--dry-run", action="store_true")
@@ -114,12 +119,12 @@ def main() -> None:
 
     with args.data.open() as data_fd:
         data_reader = csv.DictReader(data_fd, delimiter=",", dialect="unix")
-        shapes = [Shape(**row) for row in data_reader]
+        constituencies = [Constituency(**row) for row in data_reader]
 
     twitter = Twitter()
 
-    shape = random.choice(shapes)
-    tweet = twitter.update(shape, args.dry_run)
+    constituency = random.choice(constituencies)
+    tweet = twitter.update(constituency, args.dry_run)
 
     try:
         LOG.info("\"%s\" from %s", tweet.text, tweet.place.full_name)

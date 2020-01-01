@@ -1,13 +1,13 @@
 # symlink to /etc/systemd/system/
 [Unit]
-Description=Shapes of districts Twitter bot
+Description=HKDC2019 Twitter bot
 After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/fionn/bots/shapes-bot/
-EnvironmentFile=/home/fionn/bots/shapes-bot/.env
-ExecStart=/home/fionn/bots/shapes-bot/venv/bin/python3 -u src/shapes.py data.csv
+WorkingDirectory=/home/fionn/bots/hkdc2019/
+EnvironmentFile=/home/fionn/bots/hkdc2019/.env
+ExecStart=/home/fionn/bots/hkdc2019/venv/bin/python3 -u src/constituencies.py data.csv
 Restart=on-failure
 RestartSec=900
 
