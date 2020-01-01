@@ -2,7 +2,7 @@ SRC = src/
 VENV ?= venv
 
 $(VENV): requirements.txt
-	@python -m venv $@ --prompt $@::shapes
+	@python -m venv $@ --prompt $@::hkdc
 	@source $@/bin/activate && pip install -r $<
 	@echo "Enter virtual environment: source venv/bin/activate"
 
