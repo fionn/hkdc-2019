@@ -8,7 +8,7 @@ import random
 import logging
 import argparse
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, Union
 
 import tweepy
 
@@ -47,10 +47,11 @@ class Constituency:
     Coordinates = NamedTuple("Coordinates", [("lat", float), ("long", float)])
 
     # pylint: disable=too-many-arguments
-    def __init__(self, sort: int, filename: str, caption_en: str,
-                 caption_zh: str, latitude: float, longitude: float,
+    def __init__(self, sort: Union[int, str], filename: str,
+                 caption_en: str, caption_zh: str,
+                 latitude: Union[str, float], longitude: Union[str, float],
                  electoral_code: str, dc_winner: str,
-                 percentage_democracy: float) -> None:
+                 percentage_democracy: Union[str, float]) -> None:
         self._search_path = Path(os.environ["SEARCH_PATH"])
         self.sort = int(sort)
         self.file = Path(self._search_path / filename).resolve(strict=True)
@@ -78,7 +79,7 @@ class Twitter:
     def _compose(constituency: Constituency) -> dict:
         """Compose a status dictionary compatible with api.status_update"""
         if constituency.dc_winner == Faction.nonpartisan:
-            affiliation = "non-partisan" #pylint: disable=unused-variable
+            affiliation = "non-partisan"
         else:
             affiliation = f"pro-{constituency.dc_winner.name}"
 
@@ -105,8 +106,7 @@ class Twitter:
                                           file=constituency_fd)
 
         # Not implemented yet, wait for > v3.8.0
-        #self.api.create_media_metadata(media.media_id,
-        #                               f"{constituency.caption.en}")
+        #self.api.create_media_metadata(media.media_id, constituency.caption.en)
         return self.api.update_status(**composition, media_ids=[media.media_id])
 
 def main() -> None:

@@ -10,7 +10,7 @@ Export the following environment variables for authenticating to the Twitter API
 * `ACCESS_TOKEN`,
 * `ACCESS_TOKEN_SECRET`.
 
-(See [https://github.com/fionn/twitterauthenticator](twitterauthenticator) for how to generate access tokens.)
+(See [twitterauthenticator](https://github.com/fionn/twitterauthenticator) for how to generate access tokens.)
 
 You must also export `SEARCH_PATH`. This will prefix the file names given in the data.
 
@@ -19,7 +19,7 @@ You must also export `SEARCH_PATH`. This will prefix the file names given in the
 It takes a single mandatory positional argument which must be a comma-delimited file with the format matching [`example/example.csv`](example/example.csv).
 The entries in the `filename` column must be real files that exist under `SEARCH_PATH`.
 
-See `./src/shapes.py --help` for details.
+See `./src/constituencies.py --help` for details.
 
 ## Deployment
 
