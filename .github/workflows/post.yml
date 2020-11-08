@@ -1,0 +1,39 @@
+name: Post
+
+on:
+  schedule:
+  - cron: "0 3,9,12 * * *"
+
+jobs:
+  post:
+    name: Post
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Checkout GIS images
+      uses: actions/checkout@v2
+      with:
+        repository: fionn/hkdc-2019-gis-data
+        path: hkdc-2019-gis-data
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Post
+      run: ./src/constituencies.py --dry-run hkdc-2019-gis-data/data.csv
+      env:
+        SEARCH_PATH: hkdc-2019-gis-data/images/
+        API_KEY: ${{ secrets.API_KEY }}
+        API_SECRET: ${{ secrets.API_SECRET }}
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
