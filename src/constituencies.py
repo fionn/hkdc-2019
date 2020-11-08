@@ -36,8 +36,8 @@ class Faction(enum.Enum):
         """Map identifiers to enumerations"""
         try:
             return cls[identifier]
-        except KeyError:
-            raise ValueError(f"Can't enumerate {identifier}")
+        except KeyError as ex:
+            raise ValueError(f"Can't enumerate {identifier}") from ex
 
 # pylint: disable=too-few-public-methods,too-many-instance-attributes
 class Constituency:
@@ -105,8 +105,9 @@ class Twitter:
             media = self.api.media_upload(filename=constituency.file.name,
                                           file=constituency_fd)
 
-        # Not implemented yet, wait for > v3.8.0
+        # Add metadata to images
         #self.api.create_media_metadata(media.media_id, constituency.caption.en)
+
         return self.api.update_status(**composition, media_ids=[media.media_id])
 
 def main() -> None:
