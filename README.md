@@ -1,4 +1,8 @@
-# HK District Council Constituency Bot
+# Hong Kong District Council 2019 Bot
+
+## About
+
+This bot tweets satellite images of Hong Kong district council constituencies along with the outcome of the 2019 district council elections for that district.
 
 ## Configuration
 
@@ -10,7 +14,7 @@ Export the following environment variables for authenticating to the Twitter API
 * `ACCESS_TOKEN`,
 * `ACCESS_TOKEN_SECRET`.
 
-(See [twitterauthenticator](https://github.com/fionn/twitterauthenticator) for how to generate access tokens.)
+(See [twitter-authenticator](https://github.com/fionn/twitter-authenticator) for how to generate access tokens.)
 
 You must also export `SEARCH_PATH`. This will prefix the file names given in the data.
 
@@ -29,3 +33,7 @@ Add the above environment variables to `.env` in the repository root, without an
 Add the data to `data.csv` in the repository root.
 Make the virtual environment.
 Then symlink or copy the unit files in [`system_units/`](system_units/) to `/etc/systemd/system/` and enable the timer.
+
+### Actions
+
+See [`.github/workflows/post.yml`](.github/workflows/post.yml) for the deployment configuration.
