@@ -101,11 +101,7 @@ class Twitter:
         if dry_run:
             return tweepy.Status
 
-        with constituency.file.open("rb") as constituency_fd:
-            media = self.api.media_upload(filename=constituency.file.name,
-                                          file=constituency_fd)
-
-        # Add metadata to images
+        media = self.api.media_upload(filename=constituency.file)
         #self.api.create_media_metadata(media.media_id, constituency.caption.en)
 
         return self.api.update_status(**composition, media_ids=[media.media_id])
