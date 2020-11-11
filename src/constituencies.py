@@ -102,7 +102,7 @@ class Twitter:
             return tweepy.Status
 
         media = self.api.media_upload(filename=constituency.file)
-        #self.api.create_media_metadata(media.media_id, constituency.caption.en)
+        self.api.create_media_metadata(media.media_id, constituency.caption.en)
 
         return self.api.update_status(**composition, media_ids=[media.media_id])
 
